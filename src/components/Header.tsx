@@ -3,6 +3,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import LoginModal from "./LoginModal";
+import { Link } from "react-router-dom";
 
 export default function Header() {
   const { user } = useAuth();
@@ -33,7 +34,15 @@ export default function Header() {
           </button>
         ) : (
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">{user.email}</span>
+            {user && (
+              <Link
+                to="/profile"
+                className="text-sm text-gray-500 hover:text-black transition"
+                title="View profile"
+              >
+                {user.email}
+              </Link>
+            )}
             <button
               className="text-sm text-gray-500 hover:text-black transition"
               onClick={() => signOut(auth)}
