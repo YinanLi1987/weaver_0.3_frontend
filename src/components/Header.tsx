@@ -1,41 +1,51 @@
-// src/components/Header.tsx
 import { useState } from "react";
+import { useAuth } from "../auth/AuthProvider";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import LoginModal from "./LoginModal";
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <header className="flex justify-between items-center p-4 shadow bg-white">
-      {/* 左侧 Logo + 名称 */}
+      {/* Logo and site name */}
       <div className="text-xl font-bold text-gray-800">
-        Weaver <span className="text-sm text-gray-500">– for Know</span>
+        Weaver <span className="text-sm text-gray-500">– for Knowledge</span>
       </div>
 
-      {/* 右侧导航 */}
-      <nav className="flex gap-4 items-center">
+      {/* Navigation links */}
+      <nav className="flex items-center gap-4">
         <a href="/" className="text-gray-700 hover:text-blue-600">
           Home
-        </a>
-        <a href="/about" className="text-gray-700 hover:text-blue-600">
-          About
         </a>
         <a href="/dashboard" className="text-gray-700 hover:text-blue-600">
           Dashboard
         </a>
 
-        {!isLoggedIn ? (
-          <>
-            <button className="px-4 py-1 border rounded text-blue-600 hover:bg-blue-100">
-              Sign In
-            </button>
-            <button className="px-4 py-1 border rounded bg-blue-600 text-white hover:bg-blue-700">
-              Register
-            </button>
-          </>
+        {!user ? (
+          <button
+            className="text-sm text-gray-700 hover:text-black transition"
+            onClick={() => setShowLogin(true)}
+          >
+            Sign In
+          </button>
         ) : (
-          <span className="text-sm text-gray-500">Welcome!</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500">{user.email}</span>
+            <button
+              className="text-sm text-gray-500 hover:text-black transition"
+              onClick={() => signOut(auth)}
+            >
+              Sign Out
+            </button>
+          </div>
         )}
       </nav>
+
+      {/* Login modal */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </header>
   );
 }
