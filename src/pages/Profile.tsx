@@ -2,6 +2,8 @@
 import { useAuth } from "../auth/AuthProvider";
 import { useEffect, useState } from "react";
 import { formatCurrencyAuto } from "../utils/formatCurrency";
+import { getUserBalance } from "../api/user";
+import { startStripeCheckout } from "../api/payment";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -18,12 +20,8 @@ export default function Profile() {
   useEffect(() => {
     const fetchBalance = async () => {
       const token = await user?.getIdToken();
-      const res = await fetch("http://localhost:8000/api/user/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
+      if (!token) return;
+      const data = await getUserBalance(token);
       setBalance(data.balance);
     };
 
@@ -32,13 +30,9 @@ export default function Profile() {
 
   const handleRecharge = async () => {
     const token = await user?.getIdToken();
-    const res = await fetch("http://localhost:8000/api/stripe/checkout", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await res.json();
+    if (!token) return;
+
+    const data = await startStripeCheckout(token);
     if (!data.checkout_url) {
       alert("Payment failed to start. Please try again.");
       console.error("Stripe checkout failed:", data);
