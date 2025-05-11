@@ -7,7 +7,7 @@ export default function Home() {
       <main className="p-6">
         <h1 className="text-4xl font-bold mb-4">Welcome to Weaver</h1>
         <p className="text-gray-600">
-          Weaver for Know – organize, connect, and explore knowledge.
+          Weaver for Know – extract, connect, and explore knowledge.
         </p>
       </main>
 
