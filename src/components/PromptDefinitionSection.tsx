@@ -4,7 +4,7 @@ interface PromptDefinition {
   id: string;
   name: string;
   description: string;
-  examples: string;
+  examples: string[];
 }
 
 interface Props {
@@ -18,7 +18,7 @@ const PromptDefinitionSection: React.FC<Props> = ({ prompts, setPrompts }) => {
       id: crypto.randomUUID(),
       name: "",
       description: "",
-      examples: "",
+      examples: [],
     };
     setPrompts([...prompts, newPrompt]);
   };
@@ -33,7 +33,17 @@ const PromptDefinitionSection: React.FC<Props> = ({ prompts, setPrompts }) => {
     value: string
   ) => {
     setPrompts(
-      prompts.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+      prompts.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              [field]:
+                field === "examples"
+                  ? value.split(",").map((s) => s.trim())
+                  : value,
+            }
+          : p
+      )
     );
   };
 

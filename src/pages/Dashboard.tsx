@@ -6,7 +6,7 @@ import FileUploadSection from "../components/FileUploadSection";
 import PromptDefinitionSection from "../components/PromptDefinitionSection";
 import LLMSelectionSection from "../components/LLMSelectionSection";
 import AnalyzeButton from "../components/AnalyzeButton";
-import { PromptDefinition, AnalyzeResultItem } from "../api/types";
+import AnalysisTable from "../components/AnalysisTable";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -110,6 +110,9 @@ export default function Dashboard() {
         selectedColumns={selectedColumns}
         onResults={setResults}
       />
+      {results.length > 0 && (
+        <AnalysisTable results={results} onUpdate={setResults} />
+      )}
     </div>
   );
 }

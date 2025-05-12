@@ -1,5 +1,27 @@
 import { API_BASE_URL } from "./config";
-import { PromptDefinition, AnalyzeResultItem } from "./types";
+
+interface PromptDefinition {
+  name: string;
+  description: string;
+  examples: string[];
+}
+
+interface EntityEvidence {
+  entities: string[];
+  evidence: string[];
+}
+
+interface LLMResult {
+  model: string;
+  extracted: Record<string, EntityEvidence>;
+}
+
+interface AnalyzeResultItem {
+  id: string;
+  columns: Record<string, string>;
+  llmResults: LLMResult[];
+  finalEntities: Record<string, string[]>;
+}
 
 export interface AnalyzeRequest {
   prompts: PromptDefinition[];
@@ -10,12 +32,10 @@ export interface AnalyzeRequest {
 
 export async function analyzeFull(
   data: AnalyzeRequest
-): Promise<AnalyzeResponse> {
+): Promise<{ results: AnalyzeResultItem[] }> {
   const res = await fetch(`${API_BASE_URL}/analyze`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -25,8 +45,8 @@ export async function analyzeFull(
 
   const json = await res.json();
 
-  if (!json.results || !Array.isArray(json.results)) {
-    throw new Error("Invalid analysis result format");
+  if (!Array.isArray(json.results)) {
+    throw new Error("Invalid response format");
   }
 
   return json;

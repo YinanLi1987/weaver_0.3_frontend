@@ -1,6 +1,29 @@
 import React from "react";
 import { analyzeFull } from "../api/analyze";
-import { PromptDefinition, AnalyzeResultItem } from "../api/types";
+
+// Inline type definitions (no external import)
+interface PromptDefinition {
+  name: string;
+  description: string;
+  examples: string[];
+}
+
+interface EntityEvidence {
+  entities: string[];
+  evidence: string[];
+}
+
+interface LLMResult {
+  model: string;
+  extracted: Record<string, EntityEvidence>;
+}
+
+interface AnalyzeResultItem {
+  id: string;
+  columns: Record<string, string>;
+  llmResults: LLMResult[];
+  finalEntities: Record<string, string[]>;
+}
 
 interface Props {
   prompts: PromptDefinition[];
@@ -29,6 +52,30 @@ const AnalyzeButton: React.FC<Props> = ({
     }
 
     try {
+      for (const [i, prompt] of prompts.entries()) {
+        if (
+          typeof prompt.name !== "string" ||
+          typeof prompt.description !== "string" ||
+          !Array.isArray(prompt.examples) ||
+          !prompt.examples.every((ex) => typeof ex === "string")
+        ) {
+          console.error(`Prompt at index ${i} is malformed:`, prompt);
+          alert(
+            `Prompt #${
+              i + 1
+            } has an invalid structure. Check the console for details.`
+          );
+          return;
+        }
+      }
+
+      // Log payload for debugging
+      console.log("Payload being sent:", {
+        prompts,
+        models,
+        csvFileName,
+        selectedColumns,
+      });
       const response = await analyzeFull({
         prompts,
         models,
