@@ -7,6 +7,7 @@ import PromptDefinitionSection from "../components/PromptDefinitionSection";
 import LLMSelectionSection from "../components/LLMSelectionSection";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisTable from "../components/AnalysisTable";
+import LLMProgressTracker from "../components/LLMProgressTracker";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -110,6 +111,10 @@ export default function Dashboard() {
         selectedColumns={selectedColumns}
         onResults={setResults}
       />
+      {selectedModels.length > 0 && csvFileName && (
+        <LLMProgressTracker totalRows={totalRows} />
+      )}
+
       {results.length > 0 && (
         <AnalysisTable results={results} onUpdate={setResults} />
       )}
