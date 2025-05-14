@@ -30,24 +30,42 @@ export interface AnalyzeRequest {
   selectedColumns: string[];
 }
 
-export async function analyzeFull(
-  data: AnalyzeRequest
-): Promise<{ results: AnalyzeResultItem[] }> {
-  const res = await fetch(`${API_BASE_URL}/analyze`, {
+export async function analyzeFull(params: {
+  prompts: Prompt[];
+  models: string[];
+  csvFileName: string;
+  selectedColumns: string[];
+}): Promise<{ taskId: string }> {
+  const response = await fetch(`${API_BASE_URL}/analyze`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
   });
 
-  if (!res.ok) {
+  if (!response.ok) {
     throw new Error("Failed to run analysis");
   }
 
-  const json = await res.json();
-
-  if (!Array.isArray(json.results)) {
-    throw new Error("Invalid response format");
+  return await response.json();
+}
+export async function fetchProgress(
+  taskId: string
+): Promise<Record<string, number>> {
+  const res = await fetch(`${API_BASE_URL}/progress/${taskId}`);
+  if (!res.ok) throw new Error("Failed to fetch progress");
+  const data = await res.json();
+  const parsed: Record<string, number> = {};
+  for (const key in data) {
+    parsed[key] = Number(data[key]);
   }
-
-  return json;
+  return parsed;
+}
+export async function fetchResults(
+  taskId: string
+): Promise<{ results: ArticleResult[] }> {
+  const res = await fetch(`${API_BASE_URL}/results/${taskId}`);
+  if (!res.ok) throw new Error("Failed to fetch analysis results");
+  return await res.json();
 }

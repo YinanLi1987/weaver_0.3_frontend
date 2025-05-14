@@ -31,6 +31,7 @@ interface Props {
   csvFileName: string;
   selectedColumns: string[];
   onResults: (results: AnalyzeResultItem[]) => void;
+  onTaskId: (taskId: string) => void;
 }
 
 const AnalyzeButton: React.FC<Props> = ({
@@ -39,6 +40,7 @@ const AnalyzeButton: React.FC<Props> = ({
   csvFileName,
   selectedColumns,
   onResults,
+  onTaskId,
 }) => {
   const handleClick = async () => {
     if (
@@ -82,11 +84,11 @@ const AnalyzeButton: React.FC<Props> = ({
         csvFileName,
         selectedColumns,
       });
-      if (!response || !Array.isArray(response.results)) {
+      if (!response || !response.taskId) {
         alert("Invalid response format.");
         return;
       }
-      onResults(response.results);
+      onTaskId(response.taskId);
     } catch (e) {
       console.error("Analysis failed:", e);
       alert("Analysis failed.");

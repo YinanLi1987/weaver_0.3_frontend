@@ -7,7 +7,9 @@ import PromptDefinitionSection from "../components/PromptDefinitionSection";
 import LLMSelectionSection from "../components/LLMSelectionSection";
 import AnalyzeButton from "../components/AnalyzeButton";
 import AnalysisTable from "../components/AnalysisTable";
-import LLMProgressTracker from "../components/LLMProgressTracker";
+import ModelProgressPanel from "../components/ModelProgressPanel";
+import { useProgressTracker } from "../hooks/useProgressTracker";
+import { fetchResults } from "../api/analyze";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -19,6 +21,29 @@ export default function Dashboard() {
   const [prompts, setPrompts] = useState<PromptDefinition[]>([]);
   const [selectedModels, setSelectedModels] = useState<string[]>([]);
   const [results, setResults] = useState<ArticleResult[]>([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const { progress, done } = useProgressTracker(taskId);
+  // Log the current taskId for debugging
+  //console.log("taskId in Dashboard:", taskId);
+  //console.log("Progress state:", progress);
+  //console.log("Done?", done);
+  useEffect(() => {
+    if (done && taskId) {
+      fetchResults(taskId)
+        .then((data) => {
+          if (!data || !Array.isArray(data.results)) {
+            throw new Error("Invalid results format");
+          }
+          setResults(data.results); // ✅ 保持一致
+        })
+        .catch((err) => {
+          console.error("Error fetching final results:", err);
+          setAlert("❌ Failed to load analysis results.");
+        });
+    }
+    console.log("📦 Effect triggered:", { done, taskId });
+  }, [done, taskId]);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -67,12 +92,11 @@ export default function Dashboard() {
         selectedColumns,
       });
 
-      if (!response || !Array.isArray(response.results)) {
+      if (!response || !response.taskId) {
         alert("Invalid response from server.");
         return;
       }
-
-      setResults(response.results);
+      setTaskId(response.taskId);
     } catch (err) {
       alert("Analysis failed.");
       console.error(err);
@@ -110,12 +134,11 @@ export default function Dashboard() {
         csvFileName={csvFileName}
         selectedColumns={selectedColumns}
         onResults={setResults}
+        onTaskId={setTaskId}
       />
-      {selectedModels.length > 0 && csvFileName && (
-        <LLMProgressTracker totalRows={totalRows} />
-      )}
-
-      {results.length > 0 && (
+      {/* Show model progress */}
+      {taskId && <ModelProgressPanel progress={progress} done={done} />}
+      {Array.isArray(results) && results.length > 0 && (
         <AnalysisTable results={results} onUpdate={setResults} />
       )}
     </div>
