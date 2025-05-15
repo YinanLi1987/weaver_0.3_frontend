@@ -139,7 +139,11 @@ export default function Dashboard() {
       {/* Show model progress */}
       {taskId && <ModelProgressPanel progress={progress} done={done} />}
       {Array.isArray(results) && results.length > 0 && (
-        <AnalysisTable results={results} onUpdate={setResults} />
+        <AnalysisTable
+          results={results}
+          onUpdate={setResults}
+          promptNames={prompts.map((p) => p.name)}
+        />
       )}
     </div>
   );

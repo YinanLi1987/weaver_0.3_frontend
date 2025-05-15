@@ -30,9 +30,10 @@ interface ArticleResult {
 interface Props {
   results: ArticleResult[];
   onUpdate: (newResults: ArticleResult[]) => void;
+  promptNames: string[];
 }
 
-const AnalysisTable: React.FC<Props> = ({ results, onUpdate }) => {
+const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedLLMs, setSelectedLLMs] = useState<Record<string, string>>({});
   const allModels: string[] = Array.from(
@@ -61,7 +62,11 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate }) => {
           <tr>
             <th className="p-2 border w-[10%]">ID</th>
             <th className="p-2 border w-[80%]">Title</th>
-            <th className="p-2 border w-[10%]">Status</th>
+            {promptNames.map((name) => (
+              <th key={name} className="p-2 border w-[10%] text-center">
+                {name}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
@@ -76,7 +81,30 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate }) => {
                   <td className="p-2 border">
                     {Object.values(article.columns)[0] || "(no title)"}
                   </td>
-                  <td className="p-2 border"></td>
+                  {promptNames.map((field) => {
+                    const allEntities = article.llmResults
+                      .map(
+                        (r) =>
+                          r.extracted?.[field]?.entities?.sort().join(",") || ""
+                      )
+                      .filter((e) => e !== "");
+
+                    const allSame =
+                      allEntities.length > 1 &&
+                      allEntities.every((e) => e === allEntities[0]);
+
+                    return (
+                      <td key={field} className="p-2 border text-center">
+                        {allSame ? (
+                          <span className="text-green-600">
+                            {allEntities[0]}
+                          </span>
+                        ) : (
+                          <span className="text-red-500 text-xl">●</span>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
 
                 {expandedRows[article.id] && (
