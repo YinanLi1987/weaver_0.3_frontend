@@ -1,5 +1,7 @@
 // src/components/EvaluationSection.tsx
 import React from "react";
+import { matchField } from "../utils/matchField";
+import SectionTooltip from "./SectionTooltip";
 
 interface ExtractedFieldData {
   entities?: string[];
@@ -58,8 +60,13 @@ const EvaluationSection: React.FC<Props> = ({ results, promptNames }) => {
       if (!statsPerModel[model]) statsPerModel[model] = {};
 
       promptNames.forEach((field) => {
-        const base = final[field] ?? [];
-        const predicted = res.extracted?.[field]?.entities ?? [];
+        const matchedBaseField = matchField(field, final) ?? "";
+        const matchedPredField = matchField(field, res.extracted || {}) ?? "";
+
+        const base = matchedBaseField ? final[matchedBaseField] ?? [] : [];
+        const predicted = matchedPredField
+          ? res.extracted?.[matchedPredField]?.entities ?? []
+          : [];
 
         const existing = statsPerModel[model][field];
         const evaluation = evaluate(field, base, predicted);
@@ -83,7 +90,10 @@ const EvaluationSection: React.FC<Props> = ({ results, promptNames }) => {
 
   return (
     <div className="mt-10 space-y-8">
-      <h2 className="text-xl font-semibold">LLM Evaluation Summary</h2>
+      <h2 className="text-xl font-semibold">
+        LLM Evaluation Summary
+        <SectionTooltip description="See how each LLM performed by comparing its output with the confirmed final entities. Metrics include precision, recall, and F1 score." />
+      </h2>
       {Object.entries(statsPerModel).map(([model, fields]) => (
         <div key={model} className="border p-4 rounded-md shadow-sm bg-white">
           <h3 className="font-bold text-lg mb-3 text-blue-700">{model}</h3>

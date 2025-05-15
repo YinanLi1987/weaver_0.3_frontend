@@ -1,6 +1,7 @@
 import React, { useState, Dispatch, SetStateAction } from "react";
 import { uploadCSV } from "../api/upload";
 import { primaryButton, toggleButton } from "../utils/buttonStyles";
+import SectionTooltip from "./SectionTooltip";
 interface Props {
   csvFileName: string | null;
   setCsvFileName: (name: string) => void;
@@ -52,7 +53,10 @@ const FileUploadSection: React.FC<Props> = ({
 
   return (
     <section className="bg-white p-6 rounded-md shadow-md space-y-4">
-      <h2 className="text-xl font-semibold">1. Upload CSV File</h2>
+      <h2 className="text-xl font-semibold">
+        1. Upload CSV File
+        <SectionTooltip description="Upload your CSV file with the text to analyze. You will later select columns for model input." />
+      </h2>
 
       <div className="flex items-center space-x-4">
         <input type="file" accept=".csv" onChange={handleFileChange} />

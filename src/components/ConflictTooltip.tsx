@@ -1,7 +1,7 @@
 // src/components/ConflictTooltip.tsx
 import * as Tooltip from "@radix-ui/react-tooltip";
 import React from "react";
-
+import { matchField } from "../utils/matchField";
 interface ConflictTooltipProps {
   field: string;
   llmResults: {
@@ -30,7 +30,11 @@ const ConflictTooltip: React.FC<ConflictTooltipProps> = ({
         >
           {llmResults.map((r) => {
             const modelName = r.model;
-            const entityList = r.extracted?.[field]?.entities ?? [];
+            const matchedField = matchField(field, r.extracted || {});
+
+            const entityList = matchedField
+              ? r.extracted?.[matchedField]?.entities ?? []
+              : [];
 
             return (
               <div key={modelName} className="mb-2">

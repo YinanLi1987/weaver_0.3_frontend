@@ -1,5 +1,5 @@
 import React from "react";
-
+import SectionTooltip from "./SectionTooltip";
 interface PromptDefinition {
   id: string;
   name: string;
@@ -54,9 +54,18 @@ const PromptDefinitionSection: React.FC<Props> = ({ prompts, setPrompts }) => {
         <table className="w-full border text-sm">
           <thead className="bg-gray-50 text-gray-700 border-b">
             <tr>
-              <th className="p-2 border w-[12.5%]">Entity Category</th>
-              <th className="p-2 border w-[37.5%]">Description</th>
-              <th className="p-2 border w-[37.5%]">Examples</th>
+              <th className="p-2 border w-[12.5%]">
+                Entity Category
+                <SectionTooltip description="This is the name of the entity type you want to extract, such as 'Population', 'Intervention', or 'CropType'." />
+              </th>
+              <th className="p-2 border w-[37.5%]">
+                Description
+                <SectionTooltip description="Define this entity type precisely. What qualifies, what doesn't? For example: 'The group receiving the intervention. Excludes control group or general references.'" />
+              </th>
+              <th className="p-2 border w-[37.5%]">
+                Examples
+                <SectionTooltip description="List all valid values for this entity type, separated by commas. These serve as the ground truth during evaluation. For example: 'children, rural farmers, elderly patients'" />{" "}
+              </th>
               <th className="p-2 border w-[12.5%]">Action</th>
             </tr>
           </thead>

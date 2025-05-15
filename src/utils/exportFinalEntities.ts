@@ -1,3 +1,5 @@
+import { matchField } from "./matchField";
+
 interface ArticleResult {
   id: string;
   columns: Record<string, string>;
@@ -20,9 +22,7 @@ export function exportFinalEntitiesToCSV(
     };
 
     promptFields.forEach((field) => {
-      const matchedField = Object.keys(row.finalEntities || {}).find(
-        (k) => k.toLowerCase() === field.toLowerCase()
-      );
+      const matchedField = matchField(field, row.finalEntities || {});
 
       rowData[field] = matchedField
         ? (row.finalEntities[matchedField] ?? []).join(", ")

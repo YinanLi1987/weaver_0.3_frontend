@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import ArticleDetail from "./ArticleDetail";
 import ConflictTooltip from "./ConflictTooltip";
+import SectionTooltip from "./SectionTooltip";
 
 // Inline type definitions
 interface EntityWithEvidence {
@@ -57,7 +58,10 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
   return (
     <section className="bg-white p-6 rounded-md shadow-md">
       {" "}
-      <h2 className="text-lg font-semibold">Analize results</h2>
+      <h2 className="text-lg font-semibold">
+        Analize results
+        <SectionTooltip description="View and compare entities extracted by each model. Click on a row to see details and edit final entities if needed." />
+      </h2>
       <table className="w-full table-auto border-collapse text-sm">
         <thead className="bg-gray-100">
           <tr>

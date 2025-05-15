@@ -12,6 +12,7 @@ import { useProgressTracker } from "../hooks/useProgressTracker";
 import { fetchResults } from "../api/analyze";
 import EvaluationSection from "../components/EvaluationSection";
 import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
+import SectionTooltip from "../components/SectionTooltip";
 
 export default function Dashboard() {
   const { user } = useAuth();

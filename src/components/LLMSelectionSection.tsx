@@ -1,4 +1,5 @@
 import React from "react";
+import SectionTooltip from "./SectionTooltip";
 
 interface Model {
   id: string;
@@ -30,7 +31,10 @@ const LLMSelectionSection: React.FC<Props> = ({
 
   return (
     <section className="bg-white p-6 rounded-md shadow-md">
-      <h2 className="text-xl font-semibold mb-4">3. LLM Selection (max 5)</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        3. LLM Selection{" "}
+        <SectionTooltip description="Select the language models (LLMs) you want to run against your dataset. You can compare their entity extraction performance." />
+      </h2>
       <div className="flex flex-wrap gap-2">
         {availableModels.map((model) => {
           const selected = selectedModels.includes(model.id);
