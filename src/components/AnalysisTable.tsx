@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import ArticleDetail from "./ArticleDetail";
+import ConflictTooltip from "./ConflictTooltip";
 
 // Inline type definitions
 interface EntityWithEvidence {
@@ -100,7 +101,10 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
                             {allEntities[0]}
                           </span>
                         ) : (
-                          <span className="text-red-500 text-xl">●</span>
+                          <ConflictTooltip
+                            field={field}
+                            llmResults={article.llmResults}
+                          />
                         )}
                       </td>
                     );
