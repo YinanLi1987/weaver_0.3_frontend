@@ -10,6 +10,8 @@ import AnalysisTable from "../components/AnalysisTable";
 import ModelProgressPanel from "../components/ModelProgressPanel";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { fetchResults } from "../api/analyze";
+import EvaluationSection from "../components/EvaluationSection";
+import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -139,11 +141,28 @@ export default function Dashboard() {
       {/* Show model progress */}
       {taskId && <ModelProgressPanel progress={progress} done={done} />}
       {Array.isArray(results) && results.length > 0 && (
-        <AnalysisTable
-          results={results}
-          onUpdate={setResults}
-          promptNames={prompts.map((p) => p.name)}
-        />
+        <>
+          <AnalysisTable
+            results={results}
+            onUpdate={setResults}
+            promptNames={prompts.map((p) => p.name)}
+          />
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+            onClick={() =>
+              exportFinalEntitiesToCSV(
+                results,
+                prompts.map((p) => p.name)
+              )
+            }
+          >
+            Export Final Entities
+          </button>
+          <EvaluationSection
+            results={results}
+            promptNames={prompts.map((p) => p.name)}
+          />
+        </>
       )}
     </div>
   );
