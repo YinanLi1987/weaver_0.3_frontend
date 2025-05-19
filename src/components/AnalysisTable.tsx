@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import ArticleDetail from "./ArticleDetail";
 import ConflictTooltip from "./ConflictTooltip";
 import SectionTooltip from "./SectionTooltip";
+import { matchField } from "../utils/matchField";
 
 // Inline type definitions
 interface EntityWithEvidence {
@@ -34,7 +35,15 @@ interface Props {
   onUpdate: (newResults: ArticleResult[]) => void;
   promptNames: string[];
 }
+function normalize(entities: string[]) {
+  return [...new Set(entities.map((e) => e.trim().toLowerCase()))].sort();
+}
 
+function areEntityListsEqual(listA: string[], listB: string[]) {
+  const a = normalize(listA);
+  const b = normalize(listB);
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
 const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedLLMs, setSelectedLLMs] = useState<Record<string, string>>({});
@@ -87,22 +96,28 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
                     {Object.values(article.columns)[0] || "(no title)"}
                   </td>
                   {promptNames.map((field) => {
-                    const allEntities = article.llmResults
-                      .map(
-                        (r) =>
-                          r.extracted?.[field]?.entities?.sort().join(",") || ""
-                      )
-                      .filter((e) => e !== "");
+                    const baseField = matchField(
+                      field,
+                      article.llmResults[0]?.extracted || {}
+                    );
+                    const baseEntities = baseField
+                      ? article.llmResults[0]?.extracted?.[baseField]
+                          ?.entities ?? []
+                      : [];
 
-                    const allSame =
-                      allEntities.length > 1 &&
-                      allEntities.every((e) => e === allEntities[0]);
+                    const allSame = article.llmResults.every((r) => {
+                      const matched = matchField(field, r.extracted || {});
+                      const entities = matched
+                        ? r.extracted?.[matched]?.entities ?? []
+                        : [];
+                      return areEntityListsEqual(entities, baseEntities);
+                    });
 
                     return (
                       <td key={field} className="p-2 border text-center">
-                        {allSame ? (
-                          <span className="text-green-600">
-                            {allEntities[0]}
+                        {allSame && baseEntities.length > 0 ? (
+                          <span className="text-green-700 bg-green-100 px-2 py-1 rounded-full text-sm font-medium">
+                            {baseEntities.join(", ")}
                           </span>
                         ) : (
                           <ConflictTooltip

@@ -31,7 +31,6 @@ const ConflictTooltip: React.FC<ConflictTooltipProps> = ({
           {llmResults.map((r) => {
             const modelName = r.model;
             const matchedField = matchField(field, r.extracted || {});
-
             const entityList = matchedField
               ? r.extracted?.[matchedField]?.entities ?? []
               : [];
