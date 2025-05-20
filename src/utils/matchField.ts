@@ -1,8 +1,11 @@
-export function matchField<T extends Record<string, any>>(
+export function matchField(
   target: string,
-  object: T
-): string | undefined {
-  return Object.keys(object).find(
-    (key) => key.toLowerCase() === target.toLowerCase()
+  data: Record<string, any>
+): string | null {
+  const normalizedTarget = target.trim().toLowerCase();
+  const keys = Object.keys(data);
+
+  return (
+    keys.find((key) => key.trim().toLowerCase() === normalizedTarget) ?? null
   );
 }

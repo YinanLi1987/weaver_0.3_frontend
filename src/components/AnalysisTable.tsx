@@ -96,28 +96,31 @@ const AnalysisTable: React.FC<Props> = ({ results, onUpdate, promptNames }) => {
                     {Object.values(article.columns)[0] || "(no title)"}
                   </td>
                   {promptNames.map((field) => {
-                    const baseField = matchField(
-                      field,
-                      article.llmResults[0]?.extracted || {}
-                    );
-                    const baseEntities = baseField
-                      ? article.llmResults[0]?.extracted?.[baseField]
-                          ?.entities ?? []
-                      : [];
-
-                    const allSame = article.llmResults.every((r) => {
+                    const entityLists = article.llmResults.map((r) => {
                       const matched = matchField(field, r.extracted || {});
                       const entities = matched
                         ? r.extracted?.[matched]?.entities ?? []
                         : [];
-                      return areEntityListsEqual(entities, baseEntities);
+                      return normalize(entities);
                     });
+
+                    const nonEmptyLists = entityLists.filter(
+                      (list) => list.length > 0
+                    );
+
+                    const allSame =
+                      nonEmptyLists.length > 0 &&
+                      nonEmptyLists.every(
+                        (list) =>
+                          JSON.stringify(list) ===
+                          JSON.stringify(nonEmptyLists[0])
+                      );
 
                     return (
                       <td key={field} className="p-2 border text-center">
-                        {allSame && baseEntities.length > 0 ? (
-                          <span className="text-green-700 bg-green-100 px-2 py-1 rounded-full text-sm font-medium">
-                            {baseEntities.join(", ")}
+                        {allSame ? (
+                          <span className="text-green-700 font-medium">
+                            {nonEmptyLists[0].join(", ")}
                           </span>
                         ) : (
                           <ConflictTooltip
