@@ -13,7 +13,7 @@ import { fetchResults } from "../api/analyze";
 import EvaluationSection from "../components/EvaluationSection";
 import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
 import SectionTooltip from "../components/SectionTooltip";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL } from "../api/config";
 export default function Dashboard() {
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
