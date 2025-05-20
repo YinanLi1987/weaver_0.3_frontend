@@ -13,7 +13,7 @@ import { fetchResults } from "../api/analyze";
 import EvaluationSection from "../components/EvaluationSection";
 import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
 import SectionTooltip from "../components/SectionTooltip";
-
+import { API_BASE_URL } from "../config";
 export default function Dashboard() {
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
@@ -31,6 +31,9 @@ export default function Dashboard() {
   //console.log("taskId in Dashboard:", taskId);
   //console.log("Progress state:", progress);
   //console.log("Done?", done);
+  useEffect(() => {
+    console.log("🌐 API_BASE_URL =", API_BASE_URL);
+  }, []);
   useEffect(() => {
     if (done && taskId) {
       fetchResults(taskId)
