@@ -31,9 +31,9 @@ export default function Dashboard() {
   //console.log("taskId in Dashboard:", taskId);
   //console.log("Progress state:", progress);
   //console.log("Done?", done);
-  useEffect(() => {
-    console.log("🌐 API_BASE_URL =", API_BASE_URL);
-  }, []);
+  //useEffect(() => {
+  //console.log("🌐 API_BASE_URL =", API_BASE_URL);
+  //}, []);
   useEffect(() => {
     if (done && taskId) {
       fetchResults(taskId)
@@ -55,7 +55,7 @@ export default function Dashboard() {
     const fetchBalance = async () => {
       if (!user) return;
       const token = await user.getIdToken();
-      const res = await fetch("http://localhost:8000/api/user/me", {
+      const res = await fetch(`${API_BASE_URL}/user/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
