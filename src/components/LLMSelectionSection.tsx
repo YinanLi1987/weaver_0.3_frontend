@@ -12,7 +12,7 @@ interface Props {
 }
 
 const availableModels: Model[] = [
-  { id: "gpt-4", name: "GPT-4" },
+  { id: "gpt-4.1-nano", name: "GPT-4" },
   { id: "claude-3-7-sonnet-20250219", name: "Claude 3" },
   { id: "mistral-small-latest", name: "Mistral 7B" },
 ];

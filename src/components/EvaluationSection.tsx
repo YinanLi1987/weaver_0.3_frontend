@@ -24,24 +24,29 @@ interface Props {
 }
 
 function evaluate(field: string, final: string[], predicted: string[]) {
-  const gold = new Set(final.map((e) => e.toLowerCase()));
-  const pred = new Set(predicted.map((e) => e.toLowerCase()));
+  const gold = new Set(final.map((e) => e.trim().toLowerCase()));
+  const pred = new Set(predicted.map((e) => e.trim().toLowerCase()));
 
   const tp = [...pred].filter((e) => gold.has(e));
   const fp = [...pred].filter((e) => !gold.has(e));
   const fn = [...gold].filter((e) => !pred.has(e));
 
-  const precision = tp.length / (tp.length + fp.length || 1);
-  const recall = tp.length / (tp.length + fn.length || 1);
-  const f1 = (2 * precision * recall) / (precision + recall || 1);
+  const precision =
+    tp.length + fp.length === 0 ? 0 : tp.length / (tp.length + fp.length);
+  const recall =
+    tp.length + fn.length === 0 ? 0 : tp.length / (tp.length + fn.length);
+  const f1 =
+    precision + recall === 0
+      ? 0
+      : (2 * precision * recall) / (precision + recall);
 
   return {
     TP: tp.length,
     FP: fp.length,
     FN: fn.length,
-    precision: precision.toFixed(2),
-    recall: recall.toFixed(2),
-    f1: f1.toFixed(2),
+    precision,
+    recall,
+    f1,
   };
 }
 
@@ -85,6 +90,22 @@ const EvaluationSection: React.FC<Props> = ({ results, promptNames }) => {
           };
         }
       });
+    });
+  });
+  // 🔁 Recalculate precision/recall/f1 after TP/FP/FN accumulation
+  Object.entries(statsPerModel).forEach(([model, fields]) => {
+    Object.entries(fields).forEach(([field, metrics]) => {
+      const { TP, FP, FN } = metrics;
+      const precision = TP + FP === 0 ? 0 : TP / (TP + FP);
+      const recall = TP + FN === 0 ? 0 : TP / (TP + FN);
+      const f1 =
+        precision + recall === 0
+          ? 0
+          : (2 * precision * recall) / (precision + recall);
+
+      metrics.precision = precision.toFixed(2);
+      metrics.recall = recall.toFixed(2);
+      metrics.f1 = f1.toFixed(2);
     });
   });
 
