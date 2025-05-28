@@ -12,15 +12,6 @@ export default function Home() {
 
         <div className="bg-gray-100 p-4 rounded shadow text-sm text-gray-700">
           <p className="font-semibold mb-1">Developed by:</p>
-
-          <p>
-            <strong>Li Yinan</strong>
-            <br />
-            Oulu University of Applied Sciences, Finland
-            <br />
-            Lead Developer - System Architecture, Co-Design, and Implementation
-          </p>
-
           <p className="mt-4">
             <strong>Marie-Liesse Vermeire</strong>
             <br />
@@ -28,6 +19,13 @@ export default function Home() {
             <br />
             Concept Originator - Co-Design, Testing data, Sientific insights and
             iterative feedback
+          </p>
+          <p>
+            <strong>Li Yinan</strong>
+            <br />
+            Oulu University of Applied Sciences, Finland
+            <br />
+            Lead Developer - System Architecture, Co-Design, and Implementation
           </p>
         </div>
       </main>
