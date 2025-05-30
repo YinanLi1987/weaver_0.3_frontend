@@ -17,15 +17,15 @@ export default function Home() {
             <br />
             CIRAD - Persyst - UPR Recyclage et Risque
             <br />
-            Concept Originator - Co-Design, Testing data, Sientific insights and
-            iterative feedback
+            Concept Originator - Testing data, Sientific insights and iterative
+            feedback
           </p>
           <p>
             <strong>Li Yinan</strong>
             <br />
             Oulu University of Applied Sciences, Finland
             <br />
-            Lead Developer - System Architecture, Co-Design, and Implementation
+            Lead Developer - System Architecture, Design, and Implementation
           </p>
         </div>
       </main>

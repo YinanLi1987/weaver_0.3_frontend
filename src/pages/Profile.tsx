@@ -2,13 +2,16 @@
 import { useAuth } from "../auth/AuthProvider";
 import { useEffect, useState } from "react";
 import { formatCurrencyAuto } from "../utils/formatCurrency";
-import { getUserBalance } from "../api/user";
+import { getUserBalance, getUserPayments } from "../api/user";
 import { startStripeCheckout } from "../api/payment";
 
 export default function Profile() {
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [payments, setPayments] = useState<
+    { amount: number; timestamp: string }[]
+  >([]);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -18,14 +21,18 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    const fetchBalance = async () => {
+    const loadUserData = async () => {
       const token = await user?.getIdToken();
       if (!token) return;
-      const data = await getUserBalance(token);
-      setBalance(data.balance);
+      const [balanceData, paymentsData] = await Promise.all([
+        getUserBalance(token),
+        getUserPayments(token),
+      ]);
+      setBalance(balanceData.balance);
+      setPayments(paymentsData);
     };
 
-    if (user) fetchBalance();
+    if (user) loadUserData();
   }, [user]);
 
   const handleRecharge = async () => {
@@ -66,6 +73,16 @@ export default function Profile() {
       >
         Recharge
       </button>
+      <h2 className="text-lg font-semibold mt-6">Recharge History</h2>
+      <ul className="space-y-2">
+        {payments.length === 0 && <li>No recharge records found.</li>}
+        {payments.map((p, idx) => (
+          <li key={idx} className="text-sm">
+            💰 {formatCurrencyAuto(p.amount)} &nbsp; on{" "}
+            {new Date(p.timestamp).toLocaleString()}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
