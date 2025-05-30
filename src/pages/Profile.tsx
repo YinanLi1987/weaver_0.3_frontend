@@ -6,34 +6,47 @@ import { getUserBalance, getUserPayments } from "../api/user";
 import { startStripeCheckout } from "../api/payment";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [payments, setPayments] = useState<
     { amount: number; timestamp: string }[]
   >([]);
+  const [loadingData, setLoadingData] = useState(true);
 
+  // Detect if user was redirected after payment
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     if (query.get("paid") === "1") {
       setShowSuccess(true);
+      // Optional: clean up URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("paid");
+      window.history.replaceState({}, "", url.toString());
     }
   }, []);
 
+  // Load balance and payment history
   useEffect(() => {
-    const loadUserData = async () => {
-      const token = await user?.getIdToken();
-      if (!token) return;
-      const [balanceData, paymentsData] = await Promise.all([
-        getUserBalance(token),
-        getUserPayments(token),
-      ]);
-      setBalance(balanceData.balance);
-      setPayments(paymentsData);
+    const loadData = async () => {
+      if (!user) return;
+      setLoadingData(true);
+      try {
+        const token = await user.getIdToken();
+        const [balanceData, paymentsData] = await Promise.all([
+          getUserBalance(token),
+          getUserPayments(token),
+        ]);
+        setBalance(balanceData.balance);
+        setPayments(paymentsData);
+      } catch (err) {
+        console.error("Failed to load user data", err);
+      } finally {
+        setLoadingData(false);
+      }
     };
-
-    if (user) loadUserData();
-  }, [user]);
+    loadData();
+  }, [user, showSuccess]);
 
   const handleRecharge = async () => {
     const token = await user?.getIdToken();
@@ -47,7 +60,7 @@ export default function Profile() {
     }
     window.location.href = data.checkout_url;
   };
-
+  if (loading) return <div>Loading...</div>;
   if (!user) return <div className="p-6">Not logged in.</div>;
 
   return (
@@ -74,15 +87,20 @@ export default function Profile() {
         Recharge
       </button>
       <h2 className="text-lg font-semibold mt-6">Recharge History</h2>
-      <ul className="space-y-2">
-        {payments.length === 0 && <li>No recharge records found.</li>}
-        {payments.map((p, idx) => (
-          <li key={idx} className="text-sm">
-            💰 {formatCurrencyAuto(p.amount)} &nbsp; on{" "}
-            {new Date(p.timestamp).toLocaleString()}
-          </li>
-        ))}
-      </ul>
+      {loadingData ? (
+        <p>Loading payments...</p>
+      ) : payments.length === 0 ? (
+        <p>No recharge records found.</p>
+      ) : (
+        <ul className="space-y-2">
+          {payments.map((p, idx) => (
+            <li key={idx} className="text-sm">
+              💰 {formatCurrencyAuto(p.amount)} &nbsp; on{" "}
+              {new Date(p.timestamp).toLocaleString()}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
