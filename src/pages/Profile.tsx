@@ -2,7 +2,7 @@
 import { useAuth } from "../auth/AuthProvider";
 import { useEffect, useState } from "react";
 import { formatCurrencyAuto } from "../utils/formatCurrency";
-import { getUserBalance, getUserPayments } from "../api/user";
+import { getUserBalance, getUserPayments, getUserUsage } from "../api/user";
 import { startStripeCheckout } from "../api/payment";
 
 export default function Profile() {
@@ -12,6 +12,17 @@ export default function Profile() {
   const [payments, setPayments] = useState<
     { amount: number; timestamp: string }[]
   >([]);
+  const [usage, setUsage] = useState<
+    {
+      model: string;
+      tokens_input: number;
+      tokens_output: number;
+      billed_amount: number;
+      timestamp: string;
+      prompt_summary?: string;
+    }[]
+  >([]);
+
   const [loadingData, setLoadingData] = useState(true);
 
   // Detect if user was redirected after payment
@@ -33,12 +44,14 @@ export default function Profile() {
       setLoadingData(true);
       try {
         const token = await user.getIdToken();
-        const [balanceData, paymentsData] = await Promise.all([
+        const [balanceData, paymentsData, usageData] = await Promise.all([
           getUserBalance(token),
           getUserPayments(token),
+          getUserUsage(token),
         ]);
         setBalance(balanceData.balance);
         setPayments(paymentsData);
+        setUsage(usageData);
       } catch (err) {
         console.error("Failed to load user data", err);
       } finally {
@@ -97,6 +110,37 @@ export default function Profile() {
             <li key={idx} className="text-sm">
               💰 {formatCurrencyAuto(p.amount)} &nbsp; on{" "}
               {new Date(p.timestamp).toLocaleString()}
+            </li>
+          ))}
+        </ul>
+      )}
+      <h2 className="text-lg font-semibold mt-6">Usage Records</h2>
+      {loadingData ? (
+        <p>Loading usage...</p>
+      ) : usage.length === 0 ? (
+        <p>No usage records found.</p>
+      ) : (
+        <ul className="space-y-2">
+          {usage.map((u, idx) => (
+            <li
+              key={idx}
+              className="text-sm border border-gray-200 p-3 rounded bg-gray-50"
+            >
+              <div>
+                🧠 <strong>{u.model}</strong> used{" "}
+                <strong>{u.tokens_input + u.tokens_output}</strong> tokens →{" "}
+                <span className="text-blue-700 font-medium">
+                  {formatCurrencyAuto(u.billed_amount)}
+                </span>
+              </div>
+              <div className="text-xs text-gray-500">
+                {new Date(u.timestamp).toLocaleString()}
+              </div>
+              {u.prompt_summary && (
+                <div className="text-xs italic text-gray-600 mt-1">
+                  “{u.prompt_summary.slice(0, 100)}...”
+                </div>
+              )}
             </li>
           ))}
         </ul>

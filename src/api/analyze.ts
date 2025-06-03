@@ -30,16 +30,21 @@ export interface AnalyzeRequest {
   selectedColumns: string[];
 }
 
-export async function analyzeFull(params: {
-  prompts: Prompt[];
-  models: string[];
-  csvFileName: string;
-  selectedColumns: string[];
-}): Promise<{ taskId: string }> {
+export async function analyzeFull(
+  params: {
+    prompts: PromptDefinition[];
+    models: string[];
+    csvFileName: string;
+    selectedColumns: string[];
+  },
+  token: string
+): Promise<{ taskId: string }> {
+  console.log("📦 analyze payload →", params);
   const response = await fetch(`${API_BASE_URL}/analyze`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(params),
   });
@@ -67,5 +72,18 @@ export async function fetchResults(
 ): Promise<{ results: ArticleResult[] }> {
   const res = await fetch(`${API_BASE_URL}/results/${taskId}`);
   if (!res.ok) throw new Error("Failed to fetch analysis results");
-  return await res.json();
+  const data = await res.json();
+  if (data.status === "partial") {
+    console.warn("⚠️ Task partially completed:", data.message);
+    // 可弹窗、提示、或允许用户查看已完成部分
+  }
+  if (data.status === "error") {
+    throw new Error(`Analysis failed: ${data.message || "Unknown error"}`);
+  }
+
+  if (!data.results || !Array.isArray(data.results)) {
+    throw new Error("Malformed analysis result");
+  }
+
+  return { results: data.results };
 }

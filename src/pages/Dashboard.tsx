@@ -14,10 +14,9 @@ import EvaluationSection from "../components/EvaluationSection";
 import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
 import SectionTooltip from "../components/SectionTooltip";
 import { API_BASE_URL } from "../api/config";
+import { useBalance } from "../hooks/useBalance";
 export default function Dashboard() {
   const { user } = useAuth();
-  const [balance, setBalance] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState("");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
@@ -27,6 +26,7 @@ export default function Dashboard() {
   const [totalRows, setTotalRows] = useState(0);
   const [taskId, setTaskId] = useState<string | null>(null);
   const { progress, done } = useProgressTracker(taskId);
+  const { balance, loading, error, refreshBalance } = useBalance();
   // Log the current taskId for debugging
   //console.log("taskId in Dashboard:", taskId);
   //console.log("Progress state:", progress);
@@ -42,6 +42,7 @@ export default function Dashboard() {
             throw new Error("Invalid results format");
           }
           setResults(data.results); // ✅ 保持一致
+          refreshBalance();
         })
         .catch((err) => {
           console.error("Error fetching final results:", err);
@@ -50,23 +51,6 @@ export default function Dashboard() {
     }
     console.log("📦 Effect triggered:", { done, taskId });
   }, [done, taskId]);
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!user) return;
-      const token = await user.getIdToken();
-      const res = await fetch(`${API_BASE_URL}/user/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setBalance(data.balance);
-      setLoading(false);
-    };
-
-    fetchBalance();
-  }, [user]);
 
   if (!user) {
     return (

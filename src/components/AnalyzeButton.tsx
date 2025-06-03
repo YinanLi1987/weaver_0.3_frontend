@@ -1,6 +1,6 @@
 import React from "react";
 import { analyzeFull } from "../api/analyze";
-
+import { useAuth } from "../auth/AuthProvider";
 // Inline type definitions (no external import)
 interface PromptDefinition {
   name: string;
@@ -42,6 +42,7 @@ const AnalyzeButton: React.FC<Props> = ({
   onResults,
   onTaskId,
 }) => {
+  const { user } = useAuth();
   const handleClick = async () => {
     if (
       !csvFileName ||
@@ -52,7 +53,11 @@ const AnalyzeButton: React.FC<Props> = ({
       alert("Please complete all required sections.");
       return;
     }
-
+    const token = await user?.getIdToken();
+    if (!token) {
+      alert("Authentication error: Please log in.");
+      return;
+    }
     try {
       for (const [i, prompt] of prompts.entries()) {
         if (
@@ -78,12 +83,15 @@ const AnalyzeButton: React.FC<Props> = ({
         csvFileName,
         selectedColumns,
       });
-      const response = await analyzeFull({
-        prompts,
-        models,
-        csvFileName,
-        selectedColumns,
-      });
+      const response = await analyzeFull(
+        {
+          prompts,
+          models,
+          csvFileName,
+          selectedColumns,
+        },
+        token
+      );
       if (!response || !response.taskId) {
         alert("Invalid response format.");
         return;

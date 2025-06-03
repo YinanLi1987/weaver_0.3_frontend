@@ -15,3 +15,10 @@ export async function getUserPayments(token: string) {
   if (!res.ok) throw new Error("Failed to fetch payment history");
   return res.json();
 }
+export async function getUserUsage(token: string) {
+  const res = await fetch(`${API_BASE_URL}/user/usage`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to load usage");
+  return res.json();
+}
