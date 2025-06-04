@@ -318,24 +318,26 @@ export default function Home() {
           </p>
         </section>
 
-        <section className="bg-gray-50 border p-4 rounded shadow text-sm text-gray-700 space-y-4">
-          <div>
-            <p className="font-semibold text-gray-800">Developed by:</p>
-          </div>
-          <div>
-            <strong>Marie-Liesse Vermeire</strong>
-            <br />
-            CIRAD - Persyst - UPR Recyclage et Risque
-            <br />
-            Concept Originator – Testing data, scientific insights and iterative
-            feedback
-          </div>
-          <div>
-            <strong>Li Yinan</strong>
-            <br />
-            Oulu University of Applied Sciences, Finland
-            <br />
-            Lead Developer – System architecture, design, and implementation
+        <section className="bg-gray-50 border p-6 rounded shadow text-sm text-gray-700 space-y-4">
+          <p className="font-semibold text-gray-800 mb-2">Developed by:</p>
+          <div className="flex flex-col md:flex-row gap-x-12 gap-y-4">
+            {/* Li Yinan first */}
+            <div className="flex-1">
+              <strong>Li Yinan</strong>
+              <br />
+              Oulu University of Applied Sciences, Finland
+              <br />
+              Lead Developer – System architecture, design, and implementation
+            </div>
+
+            <div className="flex-1">
+              <strong>Marie-Liesse Vermeire</strong>
+              <br />
+              CIRAD - Persyst - UPR Recyclage et Risque
+              <br />
+              Concept Originator – Testing data, scientific insights and
+              iterative feedback
+            </div>
           </div>
         </section>
       </main>
