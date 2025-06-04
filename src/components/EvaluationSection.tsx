@@ -1,5 +1,6 @@
 // src/components/EvaluationSection.tsx
-import React from "react";
+
+import React, { useMemo } from "react";
 import { matchField } from "../utils/matchField";
 import SectionTooltip from "./SectionTooltip";
 
@@ -52,62 +53,65 @@ function evaluate(field: string, final: string[], predicted: string[]) {
 
 const EvaluationSection: React.FC<Props> = ({ results, promptNames }) => {
   // Collect evaluation results
-  const statsPerModel: Record<
-    string,
-    Record<string, ReturnType<typeof evaluate>>
-  > = {};
+  const statsPerModel = useMemo(() => {
+    const stats: Record<
+      string,
+      Record<string, ReturnType<typeof evaluate>>
+    > = {};
 
-  results.forEach((article) => {
-    const final = article.finalEntities;
+    results.forEach((article) => {
+      const final = article.finalEntities;
 
-    article.llmResults.forEach((res) => {
-      const model = res.model;
-      if (!statsPerModel[model]) statsPerModel[model] = {};
+      article.llmResults.forEach((res) => {
+        const model = res.model;
+        if (!stats[model]) stats[model] = {};
 
-      promptNames.forEach((field) => {
-        const matchedBaseField = matchField(field, final) ?? "";
-        const matchedPredField = matchField(field, res.extracted || {}) ?? "";
+        promptNames.forEach((field) => {
+          const matchedBaseField = matchField(field, final) ?? "";
+          const matchedPredField = matchField(field, res.extracted || {}) ?? "";
 
-        const base = matchedBaseField ? final[matchedBaseField] ?? [] : [];
-        const predicted = matchedPredField
-          ? res.extracted?.[matchedPredField]?.entities ?? []
-          : [];
+          const base = matchedBaseField ? final[matchedBaseField] ?? [] : [];
+          const predicted = matchedPredField
+            ? res.extracted?.[matchedPredField]?.entities ?? []
+            : [];
 
-        const existing = statsPerModel[model][field];
-        const evaluation = evaluate(field, base, predicted);
+          const existing = stats[model][field];
+          const evaluation = evaluate(field, base, predicted);
 
-        if (existing) {
-          // accumulate
-          ["TP", "FP", "FN"].forEach((k) => {
-            (existing as any)[k] += (evaluation as any)[k];
-          });
-        } else {
-          statsPerModel[model][field] = {
-            ...evaluation,
-            TP: evaluation.TP,
-            FP: evaluation.FP,
-            FN: evaluation.FN,
-          };
-        }
+          if (existing) {
+            // accumulate
+            ["TP", "FP", "FN"].forEach((k) => {
+              (existing as any)[k] += (evaluation as any)[k];
+            });
+          } else {
+            stats[model][field] = {
+              ...evaluation,
+              TP: evaluation.TP,
+              FP: evaluation.FP,
+              FN: evaluation.FN,
+            };
+          }
+        });
       });
     });
-  });
-  // 🔁 Recalculate precision/recall/f1 after TP/FP/FN accumulation
-  Object.entries(statsPerModel).forEach(([model, fields]) => {
-    Object.entries(fields).forEach(([field, metrics]) => {
-      const { TP, FP, FN } = metrics;
-      const precision = TP + FP === 0 ? 0 : TP / (TP + FP);
-      const recall = TP + FN === 0 ? 0 : TP / (TP + FN);
-      const f1 =
-        precision + recall === 0
-          ? 0
-          : (2 * precision * recall) / (precision + recall);
+    // 🔁 Recalculate precision/recall/f1 after TP/FP/FN accumulation
+    Object.entries(stats).forEach(([model, fields]) => {
+      Object.entries(fields).forEach(([field, metrics]) => {
+        const { TP, FP, FN } = metrics;
+        const precision = TP + FP === 0 ? 0 : TP / (TP + FP);
+        const recall = TP + FN === 0 ? 0 : TP / (TP + FN);
+        const f1 =
+          precision + recall === 0
+            ? 0
+            : (2 * precision * recall) / (precision + recall);
 
-      metrics.precision = precision.toFixed(2);
-      metrics.recall = recall.toFixed(2);
-      metrics.f1 = f1.toFixed(2);
+        metrics.precision = precision.toFixed(2);
+        metrics.recall = recall.toFixed(2);
+        metrics.f1 = f1.toFixed(2);
+      });
     });
-  });
+    return stats;
+  }, [results, promptNames]);
 
   return (
     <div className="mt-10 space-y-8">

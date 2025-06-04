@@ -1,3 +1,4 @@
+//src/components/EntityInput.tsx
 import React, { useState } from "react";
 
 interface Props {

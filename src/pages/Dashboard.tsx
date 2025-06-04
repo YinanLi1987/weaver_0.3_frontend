@@ -15,6 +15,8 @@ import { exportFinalEntitiesToCSV } from "../utils/exportFinalEntities";
 import SectionTooltip from "../components/SectionTooltip";
 import { API_BASE_URL } from "../api/config";
 import { useBalance } from "../hooks/useBalance";
+import mergeEntitiesFromAllLLMs from "../utils/mergeEntities";
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [alert, setAlert] = useState("");
@@ -35,13 +37,29 @@ export default function Dashboard() {
   //console.log("🌐 API_BASE_URL =", API_BASE_URL);
   //}, []);
   useEffect(() => {
-    if (done && taskId) {
+    if (done && taskId && prompts.length > 0) {
       fetchResults(taskId)
         .then((data) => {
           if (!data || !Array.isArray(data.results)) {
             throw new Error("Invalid results format");
           }
-          setResults(data.results); // ✅ 保持一致
+          const promptNames = prompts.map((p) => p.name);
+          const mergedResults = data.results.map((article) => {
+            if (
+              !article.finalEntities ||
+              Object.keys(article.finalEntities).length === 0
+            ) {
+              return {
+                ...article,
+                finalEntities: mergeEntitiesFromAllLLMs(
+                  article.llmResults,
+                  promptNames
+                ),
+              };
+            }
+            return article;
+          });
+          setResults(mergedResults); // ✅ 保持一致
           refreshBalance();
         })
         .catch((err) => {

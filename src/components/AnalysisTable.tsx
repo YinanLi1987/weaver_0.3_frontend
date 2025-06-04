@@ -1,3 +1,4 @@
+//src/components/AnalysisTable.tsx
 import React, { useState } from "react";
 
 import ArticleDetail from "./ArticleDetail";

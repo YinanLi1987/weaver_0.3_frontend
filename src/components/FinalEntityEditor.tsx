@@ -1,3 +1,4 @@
+//src/components/FinalEntityEditor.tsx
 import React from "react";
 import EntityInput from "./EntityInput";
 
